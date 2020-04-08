@@ -1,26 +1,42 @@
 package com.abahstudio.startup
 
-import android.content.Intent
-import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.provider.Settings
 import android.view.View
+import android.view.contentcapture.ContentCaptureSessionId
 import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.concurrent.schedule
-import kotlin.system.exitProcess
+
 
 class MainActivity : AppCompatActivity() {
+
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
+
+    //Database instance
+    private var database: FirebaseDatabase = FirebaseDatabase.getInstance();
+    private var myRef=database.reference
+
+    var myEmail:String?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        var b: Bundle? = intent.extras
+        myEmail=b!!.getString("email")
+        IncomingCalls()
 
     }
 
@@ -38,7 +54,8 @@ class MainActivity : AppCompatActivity() {
             R.id.bu8->cellID=8
             R.id.bu9->cellID=9
         }
-        PlayGame(cellID,buSelected)
+//        PlayGame(cellID,buSelected)
+        myRef.child("PlayerOnline").child(sessionID!!).child(cellID.toString()).setValue(myEmail)
     }
 
     var Player1=ArrayList<Int>()
@@ -61,7 +78,7 @@ class MainActivity : AppCompatActivity() {
             }
             if (emptyStatus==true){
                 Handler().postDelayed({     // for delay app
-                    AutoPlay()
+//                    AutoPlay()
                 }, 1000)
 
             }
@@ -153,163 +170,8 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun AutoPlay (){
-        var cellID=0
+    fun AutoPlay (cellID: Int){
 
-        if (Player2.contains(1) && Player2.contains(2) && (!( Player2.contains(3) || Player1.contains(3)))){
-            cellID=3
-        }
-        else if (Player2.contains(1) && Player2.contains(3) && (!( Player2.contains(2) || Player1.contains(2)))){
-            cellID=2
-        }
-        else if (Player2.contains(1) && Player2.contains(4) && (!( Player2.contains(7) || Player1.contains(7)))){
-            cellID=7
-        }
-        else if (Player2.contains(1) && Player2.contains(7) && (!( Player2.contains(4) || Player1.contains(4)))){
-            cellID=4
-        }
-        else if (Player2.contains(1) && Player2.contains(5) && (!( Player2.contains(9) || Player1.contains(9)))){
-            cellID=9
-        }
-        else if (Player2.contains(1) && Player2.contains(9) && (!( Player2.contains(5) || Player1.contains(5)))){
-            cellID=5
-        }
-        else if (Player2.contains(2) && Player2.contains(3) && (!( Player2.contains(1) || Player1.contains(1)))){
-            cellID=1
-        }
-        else if (Player2.contains(4) && Player2.contains(7) && (!( Player2.contains(1) || Player1.contains(1)))){
-            cellID=1
-        }
-        else if (Player2.contains(9) && Player2.contains(5) && (!( Player2.contains(1) || Player1.contains(1)))){
-            cellID=1
-        }
-        else if (Player2.contains(2) && Player2.contains(5) && (!( Player2.contains(8) || Player1.contains(8)))){
-            cellID=8
-        }
-        else if (Player2.contains(2) && Player2.contains(8) && (!( Player2.contains(5) || Player1.contains(5)))){
-            cellID=5
-        }
-        else if (Player2.contains(5) && Player2.contains(8) && (!( Player2.contains(2) || Player1.contains(2)))){
-            cellID=2
-        }
-        else if (Player2.contains(3) && Player2.contains(5) && (!( Player2.contains(7) || Player1.contains(7)))){
-            cellID=7
-        }
-        else if (Player2.contains(3) && Player2.contains(7) && (!( Player2.contains(5) || Player1.contains(5)))){
-            cellID=5
-        }
-        else if (Player2.contains(5) && Player2.contains(7) && (!( Player2.contains(3) || Player1.contains(3)))){
-            cellID=3
-        }
-        else if (Player2.contains(4) && Player2.contains(5) && (!( Player2.contains(6) || Player1.contains(6)))){
-            cellID=6
-        }
-        else if (Player2.contains(4) && Player2.contains(6) && (!( Player2.contains(5) || Player1.contains(5)))){
-            cellID=5
-        }
-        else if (Player2.contains(5) && Player2.contains(6) && (!( Player2.contains(4) || Player1.contains(4)))){
-            cellID=4
-        }
-        else if (Player2.contains(7) && Player2.contains(8) && (!( Player2.contains(9) || Player1.contains(9)))){
-            cellID=9
-        }
-        else if (Player2.contains(7) && Player2.contains(9) && (!( Player2.contains(8) || Player1.contains(8)))){
-            cellID=8
-        }
-        else if (Player2.contains(8) && Player2.contains(9) && (!( Player2.contains(7) || Player1.contains(7)))){
-            cellID=7
-        }
-        else if (Player2.contains(3) && Player2.contains(6) && (!( Player2.contains(9) || Player1.contains(9)))){
-            cellID=9
-        }
-        else if (Player2.contains(3) && Player2.contains(9) && (!( Player2.contains(6) || Player1.contains(6)))){
-            cellID=6
-        }
-        else if (Player2.contains(9) && Player2.contains(6) && (!( Player2.contains(3) || Player1.contains(3)))){
-            cellID=3
-        }
-        else if (Player1.contains(1) && Player1.contains(2) && (!( Player1.contains(3) || Player2.contains(3)))){ // player 2
-            cellID=3
-        }
-        else if (Player1.contains(1) && Player1.contains(3) && (!( Player1.contains(2) || Player2.contains(2)))){
-                cellID=2
-        }
-        else if (Player1.contains(1) && Player1.contains(4) && (!( Player1.contains(7) || Player2.contains(7)))){
-            cellID=7
-        }
-        else if (Player1.contains(1) && Player1.contains(7) && (!( Player1.contains(4) || Player2.contains(4)))){
-            cellID=4
-        }
-        else if (Player1.contains(1) && Player1.contains(5) && (!( Player1.contains(9) || Player2.contains(9)))){
-            cellID=9
-        }
-        else if (Player1.contains(1) && Player1.contains(9) && (!( Player1.contains(5) || Player2.contains(5)))){
-            cellID=5
-        }
-        else if (Player1.contains(2) && Player1.contains(3) && (!( Player1.contains(1) || Player2.contains(1)))){
-            cellID=1
-        }
-        else if (Player1.contains(4) && Player1.contains(7) && (!( Player1.contains(1) || Player2.contains(1)))){
-            cellID=1
-        }
-        else if (Player1.contains(9) && Player1.contains(5) && (!( Player1.contains(1) || Player2.contains(1)))){
-            cellID=1
-        }
-        else if (Player1.contains(2) && Player1.contains(5) && (!( Player1.contains(8) || Player2.contains(8)))){
-            cellID=8
-        }
-        else if (Player1.contains(2) && Player1.contains(8) && (!( Player1.contains(5) || Player2.contains(5)))){
-            cellID=5
-        }
-        else if (Player1.contains(5) && Player1.contains(8) && (!( Player1.contains(2) || Player2.contains(2)))){
-            cellID=2
-        }
-        else if (Player1.contains(3) && Player1.contains(5) && (!( Player1.contains(7) || Player2.contains(7)))){
-            cellID=7
-        }
-        else if (Player1.contains(3) && Player1.contains(7) && (!( Player1.contains(5) || Player2.contains(5)))){
-            cellID=5
-        }
-        else if (Player1.contains(5) && Player1.contains(7) && (!( Player1.contains(3) || Player2.contains(3)))){
-            cellID=3
-        }
-        else if (Player1.contains(4) && Player1.contains(5) && (!( Player1.contains(6) || Player2.contains(6)))){
-            cellID=6
-        }
-        else if (Player1.contains(4) && Player1.contains(6) && (!( Player1.contains(5) || Player2.contains(5)))){
-            cellID=5
-        }
-        else if (Player1.contains(5) && Player1.contains(6) && (!( Player1.contains(4) || Player2.contains(4)))){
-            cellID=4
-        }
-        else if (Player1.contains(7) && Player1.contains(8) && (!( Player1.contains(9) || Player2.contains(9)))){
-            cellID=9
-        }
-        else if (Player1.contains(7) && Player1.contains(9) && (!( Player1.contains(8) || Player2.contains(8)))){
-            cellID=8
-        }
-        else if (Player1.contains(8) && Player1.contains(9) && (!( Player1.contains(7) || Player2.contains(7)))){
-            cellID=7
-        }
-        else if (Player1.contains(3) && Player1.contains(6) && (!( Player1.contains(9) || Player2.contains(9)))){
-            cellID=9
-        }
-        else if (Player1.contains(3) && Player1.contains(9) && (!( Player1.contains(6) || Player2.contains(6)))){
-            cellID=6
-        }
-        else if (Player1.contains(9) && Player1.contains(6) && (!( Player1.contains(3) || Player2.contains(3)))){
-            cellID=3
-        }else {
-            var emptyCells = ArrayList<Int>()
-            for (collID in 1..9) {
-                if (!(Player1.contains(collID) || Player2.contains(collID))) {
-                    emptyCells.add(collID)
-                }
-            }
-            val r = Random()
-            val randIndex = r.nextInt(emptyCells.size - 0) + 0
-            cellID = emptyCells[randIndex]
-        }
         var buSelect:Button?
         when(cellID){
             1-> buSelect=bu1
@@ -373,6 +235,93 @@ class MainActivity : AppCompatActivity() {
         Player2.clear()
     }
 
+    fun buRequestEvent(view: View) {
+        var userDemail = etEmail.text.toString()
+        myRef.child("Users").child(SplitString(userDemail)).child("Request").push().setValue(myEmail)
 
+        PlayerOnline(SplitString(myEmail!!)+SplitString(userDemail))
+        PlayerSymbol="X"
+
+    }
+    fun buAcceptEvent(view: View) {
+        var userDemail = etEmail.text.toString()
+        myRef.child("Users").child(SplitString(userDemail)).child("Request").push().setValue(myEmail)
+
+        PlayerOnline(SplitString(userDemail)+SplitString(myEmail!!))
+        PlayerSymbol="O"
+    }
+
+    var sessionID:String?=null
+    var PlayerSymbol:String?=null
+    fun PlayerOnline(sessionId: String){
+        this.sessionID=sessionID
+        myRef.child("PlayerOnline").removeValue()
+        myRef.child("PlayerOnline").child(sessionID!!)
+            .addValueEventListener(object :ValueEventListener{
+                override fun onDataChange(p0: DataSnapshot) {
+                    try {
+                        Player1.clear()
+                        Player2.clear()
+                        val td=p0.value as HashMap<String,Any>
+                        if (td!=null){
+                            var value:String
+                            for (key in td.keys){
+                                value=td[key] as String
+                               if (value!=myEmail){
+                                   ActivePlayer= if (PlayerSymbol==="X") 1 else 2
+                               }else{
+                                   ActivePlayer= if (PlayerSymbol==="X") 2 else 1
+                               }
+
+                                AutoPlay(key.toInt())
+                            }
+
+                        }
+                    }catch (ex:Exception){}
+                }
+
+                override fun onCancelled(p0: DatabaseError) {
+                    
+                }
+            })
+    }
+
+
+
+
+    var number=0
+    fun IncomingCalls(){
+        myRef.child("Users").child(SplitString(myEmail!!)).child("Request")
+            .addValueEventListener(object :ValueEventListener{
+                override fun onDataChange(p0: DataSnapshot) {
+                    try {
+                        val td=p0.value as HashMap<String,Any>
+                        if (td!=null){
+                            var value:String
+                            for (key in td.keys){
+                                value=td[key] as String
+                                etEmail.setText(value)
+                                val notifyme = Notifications()
+                                notifyme.Notify(applicationContext, value +" want to play tic tac toy", number)
+                                myRef.child("Users").child(SplitString(myEmail!!)).child("Request").setValue(true)
+                                break
+                            }
+
+                        }
+                    }catch (ex:Exception){}
+                }
+
+                override fun onCancelled(p0: DatabaseError) {
+
+                }
+            })
+    }
+
+    fun SplitString(str:String):String{
+//        var split1=str.split("\\.")
+//        var str2 = split1.toString()
+        var split = str.split("@")
+        return split[0]
+    }
 
 }
